@@ -83,7 +83,7 @@ def build_model():
 
 def evaluate_model(model, X_test, Y_test, category_names):
     """
-
+    Predict Target Variables on Test Set and print classification Report for each target.
     :param model: Pre-built ML-Model
     :param X_test: Test-Features
     :param Y_test: Test-Targets (Multi-Output)
@@ -98,7 +98,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 def save_model(model, model_filepath):
     """
-
+    Save trained model ad .pkl to filepath.
     :param model:
     :param model_filepath:
     """
@@ -106,11 +106,13 @@ def save_model(model, model_filepath):
 
 
 class ConvertListToString(BaseEstimator, TransformerMixin):
-
+    """Simple Custom Transformer to join together a list of strings into one string.
+    Necessary for TF-IDF in the ML Pipeline."""
     def fit(self, X, y=None):
         return self
 
     def transform(self, X, y=None):
+        """For each column, concatenate the string elements together with a space."""
         text = X.apply(lambda x: " ".join(x))
         return text
 

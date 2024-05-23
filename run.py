@@ -1,7 +1,6 @@
 import json
 import plotly
 import pandas as pd
-
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from train_classifier import ConvertListToString

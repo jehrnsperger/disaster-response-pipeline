@@ -1,2 +1,4 @@
-/classifier.pkl
 /venv/
+file_tree.md
+/models/
+/data/DisasterResponse.db

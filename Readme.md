@@ -5,7 +5,8 @@
 2. [Prerequisites](#prerequisites)
 3. [Instructions](#instructions)
 4. [Main Components](#files)
-5. [Licensing, Authors, and Acknowledgements](#licensing)
+5. [Files](#filetree)
+6. [Licensing, Authors, and Acknowledgements](#licensing)
 
 ## Introduction <a name="introduction"></a>
 This Repository classifies text messages into one or more of 36 predefined categories. During emergencies such as natural 
@@ -24,13 +25,13 @@ pip install -r requirements.txt
 Provide the filepaths of the messages and categories datasets as the first and second argument respectively, as
 well as the filepath of the database to save the cleaned data to as the third argument. Example:
 ```
-python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
+python process_data.py ./data/disaster_messages.csv ./data/disaster_categories.csv .data/DisasterResponse.db
 ```
 2. Run the ML-Pipeline
 provide the filepath of the disaster messages database as the first argument and the filepath of the pickle file to
 save the model to as the second argument. Example: 
 ```
-python train_classifier.py DisasterResponse.db classifier.pkl
+python train_classifier.py ./data/DisasterResponse.db ./models/classifier.pkl 
 ```
 3. Start the Flask-Web-App by running
 ```
@@ -51,6 +52,24 @@ and the trained model is saved as classifier.pkl.
 #### run.py
 Generates the Flask-Web-App. The user can input a text message, which is then classified by the trained model. 
 The predicted categories are highlighted. The App also shows some basic plots about the dataset that was used for training.
+
+## Files<a name="filetree"></a>
+```
+.
+|-- LICENSE
+|-- Readme.md
+|-- data
+|   |-- disaster_categories.csv
+|   `-- disaster_messages.csv
+|-- models
+|-- process_data.py
+|-- requirements.txt
+|-- run.py
+|-- templates
+|   |-- go.html
+|   `-- master.html
+`-- train_classifier.py
+```
 
 ## Licensing, Authors, Acknowledgements<a name="licensing"></a>
 Licensed under the MIT license and provided by [Udacity](https://www.udacity.com). 

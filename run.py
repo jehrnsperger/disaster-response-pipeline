@@ -3,7 +3,7 @@ import plotly
 import pandas as pd
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from train_classifier import ConvertListToString
+from train_classifier import custom_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar, Histogram
@@ -26,7 +26,7 @@ def tokenize(text):
 
 
 # load data
-engine = create_engine('sqlite:///./DisasterResponse.db')
+engine = create_engine('sqlite:///./data/DisasterResponse.db')
 df = pd.read_sql_table('disaster_messages_categories', engine)
 
 # analyse number of occurences for each category
@@ -38,7 +38,7 @@ count_targets = boolean_df.sum()
 count_num_categories = df.iloc[:, 4:].apply(lambda x: x>0, axis=1).sum(axis=1)
 
 # load model
-model = load("./classifier.pkl")
+model = load("./models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -121,7 +121,7 @@ def go():
     query = request.args.get('query', '')
 
     # use model to predict classification for query
-    classification_labels = model.predict(pd.DataFrame([query]))[0]
+    classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 
     # This will render the go.html Please see that file.

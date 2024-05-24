@@ -1,22 +1,24 @@
 import sys
 from sqlalchemy import create_engine
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from nltk.tokenize import word_tokenize
-from nltk.stem.porter import PorterStemmer
+from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 import re
 import nltk
 from joblib import dump
+
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.download('wordnet')
 
 
 def load_data(database_filepath):
@@ -36,12 +38,13 @@ def load_data(database_filepath):
     return X, y, y.columns
 
 
-def tokenize(text):
+def custom_tokenize(text):
     """
     Apply various text processing to text.
     :param text: Text to process
     :return: Processed Text
     """
+
     # lower case
     text = text.lower()
     # remove punctuation (keep only A-Z and 0-9)
@@ -50,8 +53,8 @@ def tokenize(text):
     tokens = word_tokenize(text)
     # stop words removal
     text = [word for word in tokens if word not in stopwords.words("english")]
-    # Stemming
-    stemmed_text = [PorterStemmer().stem(word) for word in text]
+    # Lemmatizer
+    stemmed_text = [WordNetLemmatizer().lemmatize(word) for word in text]
     return stemmed_text
 
 
@@ -63,17 +66,15 @@ def build_model():
     model_rf = RandomForestClassifier(class_weight='balanced')
     model = MultiOutputClassifier(estimator=model_rf)
     pipeline = Pipeline([
-        # ('clean_text', CleanText()), # This is done separately before the model build to reduce time for tuning
-        ('list_conversion', ConvertListToString()),
-        ('tfidf', TfidfVectorizer()),
+        ('cvect', CountVectorizer(tokenizer=custom_tokenize)),
+        ('tfidf', TfidfTransformer()),
         ('cls', model),
     ])
 
     parameters = {
-        'tfidf__max_df': [1.0],
-        'cls__estimator__n_estimators': [100,],
+        'cls__estimator__n_estimators': [100, ],
         'cls__estimator__max_depth': [None, ],
-        'cls__estimator__min_samples_split': [2,],
+        'cls__estimator__min_samples_split': [2, ],
     }
     cv = 2
 
@@ -105,26 +106,12 @@ def save_model(model, model_filepath):
     dump(model, model_filepath)
 
 
-class ConvertListToString(BaseEstimator, TransformerMixin):
-    """Simple Custom Transformer to join together a list of strings into one string.
-    Necessary for TF-IDF in the ML Pipeline."""
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X, y=None):
-        """For each column, concatenate the string elements together with a space."""
-        text = X.apply(lambda x: " ".join(x))
-        return text
-
 
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
-
-        # Prepare Text data
-        X = X.apply(tokenize)
 
         # Train Test Split
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
